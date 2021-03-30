@@ -3,6 +3,10 @@ from django.http import JsonResponse
 from .products import products
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+
+from . import models
+from . import serializers
 
 @api_view(['GET'])
 def getRoutes(request):
@@ -11,12 +15,12 @@ def getRoutes(request):
 
 @api_view(['GET'])
 def getProducts(request):
-  return Response(products)
+  products = models.Product.objects.all()
+  serializer = serializers.ProductSerializer(products, many=True)
+  return Response(serializer.data)
 
 @api_view(['GET'])
 def getProduct(request, pk):
-  for i in products:
-    if i['_id'] == pk:
-     return Response(i)
-  
-  return Response(None)
+  product = get_object_or_404(models.Product, _id=pk)
+  serializer = serializers.ProductSerializer(product, many=False)
+  return Response(serializer.data)
